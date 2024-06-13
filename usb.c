@@ -1,6 +1,11 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
+
+#ifndef _WIN32
 #include <err.h>
+#else
+#define err(c, s) printf("win_err: exiting with code %i because of %s", c, s)
+#endif
 #include <fcntl.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -59,10 +64,12 @@ static int qdl_try_open(libusb_device *dev, struct qdl_device *qdl, const char *
 		return -1;
 	}
 
+
 	/* Consider only devices with vid 0x0506 and product id 0x9008 or 0x900e */
-	if (desc.idVendor != 0x05c6 || (desc.idProduct != 0x9008 && desc.idProduct != 0x900e))
+	if ((desc.idVendor != 0x05c6 || (desc.idProduct != 0x9008 && desc.idProduct != 0x900e)) && (desc.idVendor != 0x19d2 || (desc.idProduct != 0x0112)))
 		return 0;
 
+	printf("Hi i passed");
 	ret = libusb_get_active_config_descriptor(dev, &config);
 	if (ret < 0) {
 		warnx("failed to acquire USB device's active config descriptor");
@@ -115,10 +122,13 @@ static int qdl_try_open(libusb_device *dev, struct qdl_device *qdl, const char *
 			libusb_close(handle);
 			continue;
 		}
+		
+		libusb_set_auto_detach_kernel_driver(handle, 1);
+		warnx("Enabled automatic kernel driver detachment.");
 
 		ret = libusb_claim_interface(handle, ifc->bInterfaceNumber);
 		if (ret < 0) {
-			warnx("failed to claim USB interface");
+			warnx("failed to claim USB interface, error %s", libusb_error_name(ret));
 			libusb_close(handle);
 			continue;
 		}

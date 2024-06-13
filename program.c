@@ -122,12 +122,15 @@ static int load_program_tag(xmlNode *node, bool is_nand)
 	return 0;
 }
 
-int program_load(const char *program_file, bool is_nand)
+int program_load(const char *program_file, bool is_nand, bool skipSuperPartition)
 {
 	xmlNode *node;
 	xmlNode *root;
 	xmlDoc *doc;
 	int errors = 0;
+	char super_res[11];
+	char* str;
+	const char super[11] = "super.img";;
 
 	doc = xmlReadFile(program_file, NULL, 0);
 	if (!doc) {
@@ -139,6 +142,14 @@ int program_load(const char *program_file, bool is_nand)
 	for (node = root->children; node ; node = node->next) {
 		if (node->type != XML_ELEMENT_NODE)
 			continue;
+
+		str = attr_as_string(node, "filename", &errors);
+		snprintf(super_res, 10, "%s", str);
+
+		if(strcmp(super, super_res) == 0) {
+                fprintf(stderr, "[PROGRAM] skipping super partition\n");
+                continue;
+        }
 
 		if (!xmlStrcmp(node->name, (xmlChar *)"erase"))
 			errors = load_erase_tag(node, is_nand);

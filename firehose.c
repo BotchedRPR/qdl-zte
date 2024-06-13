@@ -136,7 +136,7 @@ static int firehose_read(struct qdl_device *qdl, int timeout_ms,
 			if (timercmp(&now, &timeout, <))
 				continue;
 
-			warnx("firehose operation timed out");
+			warnx("firehose operation ended.");
 			return -ETIMEDOUT;
 		}
 		buf[n] = '\0';
@@ -408,6 +408,12 @@ static int firehose_program(struct qdl_device *qdl, struct program *program, int
 			err(1, "failed to write full sector");
 
 		left -= chunk_size;
+		fprintf(stdout,
+			"\r[%d%%] flashing %s\t%d/%d sectors written",
+			100 * (num_sectors - left) / num_sectors,
+			program->label,
+			num_sectors - left,
+			num_sectors);
 	}
 
 	t = time(NULL) - t0;

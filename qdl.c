@@ -29,7 +29,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef _WIN32
 #include <err.h>
+#else
+#define err(c, s) printf("win_err: exiting with code %i because of %s", c, s)
+#endif
 #include <errno.h>
 #include <getopt.h>
 #include <stdbool.h>
@@ -97,7 +101,7 @@ static void print_usage(void)
 {
 	extern const char *__progname;
 	fprintf(stderr,
-		"%s [--debug] [--storage <emmc|nand|ufs>] [--finalize-provisioning] [--include <PATH>] <prog.mbn> [<program> <patch> ...]\n",
+		"%s [--debug] [--skip-super] [--storage <emmc|nand|ufs>] [--finalize-provisioning] [--include <PATH>] <prog.mbn> [<program> <patch> ...]\n",
 		__progname);
 }
 
@@ -109,7 +113,7 @@ int main(int argc, char **argv)
 	int type;
 	int ret;
 	int opt;
-	bool qdl_finalize_provisioning = false;
+	bool qdl_finalize_provisioning, qdl_skip_super = false;
 
 
 	static struct option options[] = {
@@ -117,6 +121,7 @@ int main(int argc, char **argv)
 		{"include", required_argument, 0, 'i'},
 		{"finalize-provisioning", no_argument, 0, 'l'},
 		{"serial", required_argument, 0, 'S'},
+		{"skip-super", no_argument, 0, 'k'},
 		{"storage", required_argument, 0, 's'},
 		{0, 0, 0, 0}
 	};
@@ -134,6 +139,10 @@ int main(int argc, char **argv)
 			break;
 		case 's':
 			storage = optarg;
+			break;
+		case 'k':
+			/* skip super partition */
+			qdl_skip_super = true;
 			break;
 		case 'S':
 			serial = optarg;
@@ -164,7 +173,7 @@ int main(int argc, char **argv)
 				errx(1, "patch_load %s failed", argv[optind]);
 			break;
 		case QDL_FILE_PROGRAM:
-			ret = program_load(argv[optind], !strcmp(storage, "nand"));
+			ret = program_load(argv[optind], !strcmp(storage, "nand"), qdl_skip_super);
 			if (ret < 0)
 				errx(1, "program_load %s failed", argv[optind]);
 			break;
@@ -189,6 +198,7 @@ int main(int argc, char **argv)
 		return 1;
 
 	ret = firehose_run(&qdl, incdir, storage);
+	fprintf(stderr, "[QDL] FINISH! To boot, flash super partition via fastboot\n");
 	if (ret < 0)
 		return 1;
 

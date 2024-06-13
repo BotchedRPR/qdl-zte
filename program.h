@@ -21,7 +21,7 @@ struct program {
 	struct program *next;
 };
 
-int program_load(const char *program_file, bool is_nand);
+int program_load(const char *program_file, bool is_nand, bool skipSuperPartition);
 int program_execute(struct qdl_device *qdl, int (*apply)(struct qdl_device *qdl, struct program *program, int fd),
 		    const char *incdir);
 int erase_execute(struct qdl_device *qdl, int (*apply)(struct qdl_device *qdl, struct program *program));
