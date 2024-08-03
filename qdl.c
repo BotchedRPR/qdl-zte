@@ -198,7 +198,6 @@ int main(int argc, char **argv)
 		return 1;
 
 	ret = firehose_run(&qdl, incdir, storage);
-	fprintf(stderr, "[QDL] FINISH! To boot, flash super partition via fastboot\n");
 	if (ret < 0)
 		return 1;
 
