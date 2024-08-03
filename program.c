@@ -146,10 +146,10 @@ int program_load(const char *program_file, bool is_nand, bool skipSuperPartition
 		str = attr_as_string(node, "filename", &errors);
 		snprintf(super_res, 10, "%s", str);
 
-		if(strcmp(super, super_res) == 0) {
-                fprintf(stderr, "[PROGRAM] skipping super partition\n");
-                continue;
-        }
+		if(skipSuperPartition && strcmp(super, super_res) == 0) {
+                	fprintf(stderr, "[PROGRAM] skipping super partition\n");
+                	continue;
+        	}
 
 		if (!xmlStrcmp(node->name, (xmlChar *)"erase"))
 			errors = load_erase_tag(node, is_nand);
