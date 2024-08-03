@@ -425,7 +425,7 @@ static int firehose_program(struct qdl_device *qdl, struct program *program, int
 		fprintf(stderr,
 			"[PROGRAM] flashed \"%s\" successfully at %ldkB/s\n",
 			program->label,
-			program->sector_size * num_sectors / t / 1024);
+			(long)(program->sector_size * num_sectors) / t / 1024);
 	} else {
 		fprintf(stderr, "[PROGRAM] flashed \"%s\" successfully\n",
 			program->label);
