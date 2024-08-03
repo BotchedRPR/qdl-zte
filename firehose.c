@@ -208,7 +208,8 @@ static int firehose_configure_response_parser(xmlNode *node, void *data)
 
 	value = xmlGetProp(node, (xmlChar*)"value");
 	if (xmlStrcmp(node->name, (xmlChar*)"log") == 0) {
-		printf("LOG: %s\n", value);
+		if(qdl_debug)
+			printf("LOG: %s\n", value);
 		return 0;
 	}
 
@@ -419,15 +420,19 @@ static int firehose_program(struct qdl_device *qdl, struct program *program, int
 	t = time(NULL) - t0;
 
 	ret = firehose_read(qdl, 30000, firehose_generic_parser, NULL);
+	
+	/* We have to use ugly newlines here because the fprintf for progress
+	 * can't use a newline, as that'd scroll the progress down and make it
+	 * basically unreadable. */
 	if (ret) {
-		fprintf(stderr, "[PROGRAM] failed\n");
+		fprintf(stderr, "\n[PROGRAM] failed\n");
 	} else if (t) {
 		fprintf(stderr,
-			"[PROGRAM] flashed \"%s\" successfully at %ldkB/s\n",
+			"\n[PROGRAM] flashed \"%s\" successfully at %ldkB/s\n",
 			program->label,
 			(long)(program->sector_size * num_sectors) / t / 1024);
 	} else {
-		fprintf(stderr, "[PROGRAM] flashed \"%s\" successfully\n",
+		fprintf(stderr, "\n[PROGRAM] flashed \"%s\" successfully\n",
 			program->label);
 	}
 
