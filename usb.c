@@ -69,7 +69,6 @@ static int qdl_try_open(libusb_device *dev, struct qdl_device *qdl, const char *
 	if ((desc.idVendor != 0x05c6 || (desc.idProduct != 0x9008 && desc.idProduct != 0x900e)) && (desc.idVendor != 0x19d2 || (desc.idProduct != 0x0112)))
 		return 0;
 
-	printf("Hi i passed");
 	ret = libusb_get_active_config_descriptor(dev, &config);
 	if (ret < 0) {
 		warnx("failed to acquire USB device's active config descriptor");
